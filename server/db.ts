@@ -2,11 +2,11 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from '../shared/schema.js';
 
-// Get DATABASE_URL from environment or use a default for development
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/ecommerce';
+// Ensure DATABASE_URL is set
+const databaseUrl = process.env.DATABASE_URL;
 
-if (!process.env.DATABASE_URL) {
-  console.warn('DATABASE_URL not set, using default PostgreSQL connection');
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL environment variable is required but not set. Please configure your database connection.');
 }
 
 const pool = new Pool({
