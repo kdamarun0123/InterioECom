@@ -2,8 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import Stripe from "stripe";
+import { db } from "./db";
 import { storage } from "./storage";
 import {
+  products,
   insertUserSchema,
   insertProductSchema,
   insertCategorySchema,

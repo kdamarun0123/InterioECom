@@ -20,6 +20,22 @@ export type {
   InsertTransactionEvent,
 } from '@shared/schema';
 
+// Legacy Product type for backward compatibility
+export interface LegacyProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  category: string;
+  images: string[];
+  rating: number;
+  reviewCount: number;
+  inStock: boolean;
+  tags: string[];
+  featured?: boolean;
+}
+
 // Additional frontend-specific types
 export interface AuthState {
   user: User | null;

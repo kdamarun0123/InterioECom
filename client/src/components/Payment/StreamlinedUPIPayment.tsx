@@ -253,9 +253,9 @@ const StreamlinedUPIPayment: React.FC<StreamlinedUPIPaymentProps> = ({
           upi: true,
         },
         prefill: {
-          name: customerInfo.name,
-          email: customerInfo.email,
-          contact: customerInfo.contact,
+          name: 'Test Customer',
+          email: 'test@example.com',
+          contact: '9999999999',
         },
         theme: {
           color: RAZORPAY_CONFIG.company.theme.color,

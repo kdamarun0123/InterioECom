@@ -1,4 +1,15 @@
-import { v4 as uuidv4 } from 'uuid';
+// Use crypto.randomUUID() for better browser compatibility
+const generateUUID = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 export interface PaymentData {
   transactionId: string;
@@ -19,7 +30,7 @@ export interface CardProcessingResult {
 
 // Generate random transaction ID
 export const generateTransactionId = (): string => {
-  return `TXN_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`;
+  return `TXN_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`;
 };
 
 // Generate random auth code for successful transactions

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Truck, CheckCircle, Clock, Eye, RotateCcw, MapPin, Phone } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, Eye, RotateCcw, MapPin, Phone, X } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 

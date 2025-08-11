@@ -1,4 +1,15 @@
-import { v4 as uuidv4 } from 'uuid';
+// Use crypto.randomUUID() for better browser compatibility
+const generateUUID = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 export interface PaymentMethod {
   id: string;
@@ -105,7 +116,7 @@ export class PaymentService {
     if (success) {
       return {
         success: true,
-        transactionId: `UPI_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+        transactionId: `UPI_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
         paymentMethod: 'UPI',
         amount: request.amount,
         timestamp: Date.now(),
@@ -115,7 +126,7 @@ export class PaymentService {
     } else {
       return {
         success: false,
-        transactionId: `UPI_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+        transactionId: `UPI_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
         paymentMethod: 'UPI',
         amount: request.amount,
         timestamp: Date.now(),
@@ -143,7 +154,7 @@ export class PaymentService {
     if (!this.validateCardNumber(cardData.cardNumber)) {
       return {
         success: false,
-        transactionId: `CARD_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+        transactionId: `CARD_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
         paymentMethod: 'Credit/Debit Card',
         amount: request.amount,
         timestamp: Date.now(),
@@ -161,7 +172,7 @@ export class PaymentService {
     if (success) {
       return {
         success: true,
-        transactionId: `CARD_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+        transactionId: `CARD_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
         paymentMethod: 'Credit/Debit Card',
         amount: request.amount,
         timestamp: Date.now(),
@@ -171,7 +182,7 @@ export class PaymentService {
     } else {
       return {
         success: false,
-        transactionId: `CARD_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+        transactionId: `CARD_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
         paymentMethod: 'Credit/Debit Card',
         amount: request.amount,
         timestamp: Date.now(),
@@ -192,7 +203,7 @@ export class PaymentService {
     
     return {
       success: true,
-      transactionId: `COD_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+      transactionId: `COD_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
       paymentMethod: 'Cash on Delivery',
       amount: request.amount,
       timestamp: Date.now(),
@@ -226,7 +237,7 @@ export class PaymentService {
     if (success) {
       return {
         success: true,
-        transactionId: `TEST_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+        transactionId: `TEST_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
         paymentMethod: 'Test Payment',
         amount: request.amount,
         timestamp: Date.now(),
@@ -236,7 +247,7 @@ export class PaymentService {
     } else {
       return {
         success: false,
-        transactionId: `TEST_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+        transactionId: `TEST_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
         paymentMethod: 'Test Payment',
         amount: request.amount,
         timestamp: Date.now(),
@@ -269,7 +280,7 @@ export class PaymentService {
     } catch (error) {
       return {
         success: false,
-        transactionId: `ERR_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`,
+        transactionId: `ERR_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`,
         paymentMethod: request.paymentMethod,
         amount: request.amount,
         timestamp: Date.now(),
@@ -322,6 +333,6 @@ export class PaymentService {
    * Generate transaction reference
    */
   static generateTransactionReference(): string {
-    return `TXN_${Date.now()}_${uuidv4().substring(0, 8).toUpperCase()}`;
+    return `TXN_${Date.now()}_${generateUUID().substring(0, 8).toUpperCase()}`;
   }
 }

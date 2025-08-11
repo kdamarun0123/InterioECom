@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Smartphone, CreditCard, AlertCircle } from 'lucide-react';
+import { Smartphone, CreditCard, AlertCircle, Loader } from 'lucide-react';
 
 interface StreamlinedRazorpayUPIProps {
   amount: number;
