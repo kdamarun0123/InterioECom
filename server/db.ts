@@ -3,13 +3,12 @@ import { Pool } from 'pg';
 import * as schema from '../shared/schema.js';
 
 // Get database URL from environment or use Replit's default
-const databaseUrl = process.env.DATABASE_URL || process.env.REPLIT_DB_URL;
+const databaseUrl = process.env.DATABASE_URL || process.env.REPLIT_DB_URL || 'postgresql://postgres:password@localhost:5432/ecommerce';
 
-if (!databaseUrl) {
-  console.error('Database connection error: Neither DATABASE_URL nor REPLIT_DB_URL environment variables are set.');
-  console.error('Please set DATABASE_URL in your Replit secrets to your PostgreSQL connection string.');
-  console.error('The connection string should look like: postgresql://username:password@host:port/database');
-  throw new Error('Database connection not configured. Please set DATABASE_URL in Replit secrets.');
+if (!process.env.DATABASE_URL && !process.env.REPLIT_DB_URL) {
+  console.warn('Warning: Neither DATABASE_URL nor REPLIT_DB_URL environment variables are set.');
+  console.warn('Using fallback database connection. For production, set DATABASE_URL in your environment.');
+  console.warn('The connection string should look like: postgresql://username:password@host:port/database');
 }
 
 console.log('Attempting to connect to database...');
