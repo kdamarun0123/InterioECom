@@ -126,12 +126,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 id: product.id,
                 name: product.name,
                 description: product.description,
-                price: product.price,
-                originalPrice: product.original_price,
+                price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
+                originalPrice: product.original_price ? 
+                  (typeof product.original_price === 'string' ? parseFloat(product.original_price) : product.original_price) : 
+                  undefined,
                 category: product.category,
                 images: product.images,
-                rating: product.rating,
-                reviewCount: product.review_count,
+                rating: typeof product.rating === 'string' ? parseFloat(product.rating) : product.rating,
+                reviewCount: product.review_count || 0,
                 inStock: product.stock > 0,
                 tags: product.tags,
                 featured: product.featured,

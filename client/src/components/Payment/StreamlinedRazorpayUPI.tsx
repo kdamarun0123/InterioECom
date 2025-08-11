@@ -85,7 +85,7 @@ export const StreamlinedRazorpayUPI: React.FC<StreamlinedRazorpayUPIProps> = ({
         >
           {isProcessing ? (
             <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <Loader className="w-5 h-5 animate-spin" />
               Processing...
             </>
           ) : (

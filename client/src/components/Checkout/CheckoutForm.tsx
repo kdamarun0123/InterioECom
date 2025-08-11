@@ -38,7 +38,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onBack, product }) => {
 
   // Helper function to get product price (handles both regular and deal products)
   const getProductPrice = (prod: any) => {
-    return Number(prod.price) || Number(prod.dealPrice) || 0;
+    // Handle both string and number prices, and deal prices
+    const price = prod.price || prod.dealPrice;
+    return typeof price === 'string' ? parseFloat(price) : (Number(price) || 0);
   };
 
   // Calculate order details

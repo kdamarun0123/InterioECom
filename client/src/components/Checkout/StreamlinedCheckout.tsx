@@ -64,11 +64,13 @@ const StreamlinedCheckout: React.FC<StreamlinedCheckoutProps> = ({
 
   // Fix for both regular products and deal products
   const getProductPrice = (prod: any) => {
-    return Number(prod.price) || Number(prod.dealPrice) || 0;
+    // Handle both string and number prices, and deal prices
+    const price = prod.price || prod.dealPrice;
+    return typeof price === 'string' ? parseFloat(price) : (Number(price) || 0);
   };
   
   const baseAmount = product ? getProductPrice(product) : 
-    cartItems.reduce((sum, item) => sum + (getProductPrice(item.product) * (item.quantity || 0)), 0);
+    cartItems.reduce((sum, item) => sum + (getProductPrice(item.product) * (item.quantity || 1)), 0);
 
   // Final amount is ONLY the base price - no taxes, shipping, or fees
   const finalAmount = baseAmount || 0;
