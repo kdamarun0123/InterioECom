@@ -1,11 +1,11 @@
 // Razorpay Configuration
 export const RAZORPAY_CONFIG = {
   // Test API Keys - Replace with your actual test keys
-  keyId: process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag', // Test Key ID
-  keySecret: process.env.RAZORPAY_KEY_SECRET || 'thisissecretkey', // Server-side only
+  keyId: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag', // Test Key ID
+  keySecret: import.meta.env.RAZORPAY_KEY_SECRET || 'thisissecretkey', // Server-side only
   
   // Test webhook secret
-  webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || 'whsec_test_webhook_secret_dummy',
+  webhookSecret: import.meta.env.RAZORPAY_WEBHOOK_SECRET || 'whsec_test_webhook_secret_dummy',
   
   // API endpoints
   baseUrl: 'https://api.razorpay.com/v1',
