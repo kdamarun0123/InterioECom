@@ -1,6 +1,9 @@
 import { drizzle } from 'drizzle-orm/neon-serverless';
-import { neon } from '@neondatabase/serverless';
+import { neon, neonConfig } from '@neondatabase/serverless';
 import * as schema from '../shared/schema.js';
+
+// Configure Neon for serverless environments
+neonConfig.fetchConnectionCache = true;
 
 // Get DATABASE_URL from environment or use a default for development
 const databaseUrl = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/ecommerce';
