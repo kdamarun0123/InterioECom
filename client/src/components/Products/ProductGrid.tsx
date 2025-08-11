@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { productService } from '../../services/apiService';
 import ProductCard from './ProductCard';
 import ProductDetail from './ProductDetail';
-import CheckoutPage from '../Checkout/CheckoutPage';
+// CheckoutPage removed - using simple checkout
 import type { Product } from '@shared/schema';
 
 interface ProductGridProps {
@@ -49,15 +49,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
     setCheckoutProduct(null);
   };
 
-  if (checkoutProduct) {
-    return (
-      <CheckoutPage
-        product={checkoutProduct}
-        onBack={() => setCheckoutProduct(null)}
-        onComplete={handleCheckoutComplete}
-      />
-    );
-  }
+  // Checkout functionality removed - using simple order system
 
   if (loading) {
     return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Zap, ShoppingCart, Timer, Star, ArrowRight } from 'lucide-react';
-import StreamlinedCheckout from '../Checkout/StreamlinedCheckout';
+// StreamlinedCheckout removed - using simple checkout
 
 interface DealProduct {
   id: string;
@@ -236,13 +236,11 @@ const OneRupeeDeals: React.FC = () => {
   const activeDeals = deals.filter(deal => timeRemaining[deal.id] > 0);
 
   if (selectedDeal) {
-    return (
-      <StreamlinedCheckout
-        product={selectedDeal}
-        onBack={() => setSelectedDeal(null)}
-        onComplete={() => setSelectedDeal(null)}
-      />
-    );
+    // Navigate to checkout with the deal product
+    window.dispatchEvent(new CustomEvent('navigate-to-streamlined-checkout', { 
+      detail: { product: selectedDeal } 
+    }));
+    setSelectedDeal(null);
   }
 
   if (activeDeals.length === 0) {

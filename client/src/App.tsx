@@ -20,13 +20,13 @@ import Testimonials from './components/HomePage/Testimonials';
 import Newsletter from './components/HomePage/Newsletter';
 import CartSidebar from './components/Cart/CartSidebar';
 import WhatsAppChat from './components/UI/WhatsAppChat';
-import PaymentDiagnosticsPanel from './components/UI/PaymentDiagnosticsPanel';
-import StreamlinedCheckout from './components/Checkout/StreamlinedCheckout';
+// PaymentDiagnosticsPanel removed
+// StreamlinedCheckout removed - using simple checkout now
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [showCheckout, setShowCheckout] = useState(false);
-  const [showStreamlinedCheckout, setShowStreamlinedCheckout] = useState(false);
+  // Streamlined checkout removed
   const [checkoutProduct, setCheckoutProduct] = useState<any>(null);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ function App() {
 
     const handleStreamlinedCheckoutNavigation = (event: any) => {
       setCheckoutProduct(event.detail.product);
-      setShowStreamlinedCheckout(true);
+      setShowCheckout(true);
     };
     window.addEventListener('navigate-to-checkout', handleCheckoutNavigation);
     window.addEventListener('navigate-to-orders', handleOrdersNavigation);
@@ -69,26 +69,14 @@ function App() {
       <Provider store={store}>
         <Router>
           <div className="min-h-screen bg-white font-inter">
-            <CheckoutForm onBack={() => setShowCheckout(false)} />
-          </div>
-        </Router>
-      </Provider>
-    );
-  }
-
-  if (showStreamlinedCheckout) {
-    return (
-      <Provider store={store}>
-        <Router>
-          <div className="min-h-screen bg-white font-inter">
-            <StreamlinedCheckout 
+            <CheckoutForm 
               product={checkoutProduct}
               onBack={() => {
-                setShowStreamlinedCheckout(false);
+                setShowCheckout(false);
                 setCheckoutProduct(null);
               }}
               onComplete={() => {
-                setShowStreamlinedCheckout(false);
+                setShowCheckout(false);
                 setCheckoutProduct(null);
                 setCurrentPage('orders');
               }}
@@ -98,6 +86,8 @@ function App() {
       </Provider>
     );
   }
+
+  // Streamlined checkout removed - using simple checkout
   const renderPage = () => {
     switch (currentPage) {
       case 'products':
@@ -136,7 +126,7 @@ function App() {
           {currentPage === 'home' && <Footer />}
           <CartSidebar />
           <WhatsAppChat />
-          <PaymentDiagnosticsPanel />
+          {/* PaymentDiagnosticsPanel removed */}
         </div>
       </Router>
     </Provider>

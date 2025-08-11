@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
-import Stripe from "stripe";
-import Razorpay from "razorpay";
+
+
 import { db } from "./db";
 import { storage } from "./storage";
 import {
@@ -20,16 +20,9 @@ import {
 } from "@shared/schema";
 import { eq } from 'drizzle-orm';
 
-// Initialize Stripe with dummy key for development
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy_key_for_development", {
-  apiVersion: "2024-06-20",
-});
 
-// Initialize Razorpay with actual credentials
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-});
+
+
 
 // Mock data fallback when database is not available
 const mockCategories = [
@@ -473,6 +466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Transaction event handling for orders (without payment processing)
   app.post("/api/transaction-events", async (req, res) => {
     try {
       const eventData = insertTransactionEventSchema.parse(req.body);
@@ -483,175 +477,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe payment route for one-time payments
-  app.post("/api/create-payment-intent", async (req, res) => {
-    try {
-      const { amount, currency = "usd", metadata = {} } = req.body;
-      
-      // For development with dummy keys, return mock response
-      if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === "sk_test_dummy_key_for_development") {
-        res.json({ 
-          clientSecret: `pi_test_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`,
-          paymentIntentId: `pi_test_${Date.now()}`
-        });
-        return;
-      }
 
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
-        currency,
-        metadata,
-        automatic_payment_methods: {
-          enabled: true,
-        },
-      });
-      
-      res.json({ 
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id
-      });
-    } catch (error: any) {
-      res
-        .status(500)
-        .json({ message: "Error creating payment intent: " + error.message });
-    }
-  });
 
-  // Webhook endpoint for Stripe events
-  app.post("/api/stripe-webhook", async (req, res) => {
-    try {
-      // For development with dummy keys, just acknowledge
-      if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === "sk_test_dummy_key_for_development") {
-        res.json({ received: true });
-        return;
-      }
 
-      const sig = req.headers['stripe-signature'];
-      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-      if (!sig || !endpointSecret) {
-        return res.status(400).send('Missing signature or webhook secret');
-      }
-
-      let event;
-      try {
-        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-      } catch (err: any) {
-        return res.status(400).send(`Webhook signature verification failed: ${err.message}`);
-      }
-
-      // Handle the event
-      switch (event.type) {
-        case 'payment_intent.succeeded':
-          const paymentIntent = event.data.object;
-          console.log(`PaymentIntent for ${paymentIntent.amount} was successful!`);
-          // Update order status, send confirmation email, etc.
-          break;
-        case 'payment_intent.payment_failed':
-          const failedPayment = event.data.object;
-          console.log(`Payment failed for PaymentIntent ${failedPayment.id}`);
-          break;
-        default:
-          console.log(`Unhandled event type ${event.type}`);
-      }
-
-      res.json({ received: true });
-    } catch (error: any) {
-      res.status(400).json({ error: error.message });
-    }
-  });
-
-  // Razorpay payment routes
-  app.post('/api/payments/razorpay/create-order', async (req, res) => {
-    try {
-      const { amount, currency, receipt, notes } = req.body;
-      
-      // Validate input
-      if (!amount || amount <= 0) {
-        return res.status(400).json({ error: 'Invalid amount' });
-      }
-      
-      // Create actual Razorpay order
-      const orderOptions = {
-        amount: Math.round(amount * 100), // Convert to paise and ensure integer
-        currency: currency || 'INR',
-        receipt: receipt || `order_${Date.now()}`,
-        notes: notes || {}
-      };
-      
-      const order = await razorpay.orders.create(orderOptions);
-      console.log('Created Razorpay order:', order);
-      
-      res.json({ 
-        success: true, 
-        order,
-        keyId: process.env.RAZORPAY_KEY_ID // Send key ID for frontend
-      });
-    } catch (error) {
-      console.error('Error creating Razorpay order:', error);
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : 'Failed to create order'
-      });
-    }
-  });
-
-  app.post('/api/payments/razorpay/verify', async (req, res) => {
-    try {
-      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-      
-      // Validate input
-      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-        return res.status(400).json({ error: 'Missing payment verification data' });
-      }
-      
-      // Verify payment signature
-      const crypto = await import('crypto');
-      const body = razorpay_order_id + "|" + razorpay_payment_id;
-      const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
-        .update(body.toString())
-        .digest('hex');
-      
-      const isAuthentic = expectedSignature === razorpay_signature;
-      
-      if (isAuthentic) {
-        // Fetch payment details from Razorpay
-        const payment = await razorpay.payments.fetch(razorpay_payment_id);
-        
-        console.log('Payment verified successfully:', {
-          paymentId: razorpay_payment_id,
-          orderId: razorpay_order_id,
-          amount: payment.amount,
-          status: payment.status
-        });
-        
-        res.json({ 
-          success: true, 
-          verified: true,
-          payment: {
-            id: razorpay_payment_id,
-            orderId: razorpay_order_id,
-            amount: payment.amount,
-            status: payment.status,
-            method: payment.method,
-            timestamp: Date.now()
-          }
-        });
-      } else {
-        console.log('Payment verification failed: Invalid signature');
-        res.status(400).json({ 
-          success: false, 
-          error: 'Invalid payment signature' 
-        });
-      }
-    } catch (error) {
-      console.error('Error verifying Razorpay payment:', error);
-      res.status(500).json({ 
-        success: false,
-        error: error instanceof Error ? error.message : 'Payment verification failed' 
-      });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;
