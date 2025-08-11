@@ -132,10 +132,10 @@ const ProductsPage: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleRefresh}
-                disabled={productsLoading}
+                disabled={productsLoading || isRefreshing}
                 className="flex items-center justify-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors disabled:opacity-50"
               >
-                <RefreshCw className={`w-5 h-5 ${productsLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-5 h-5 ${(productsLoading || isRefreshing) ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
               </motion.button>
               

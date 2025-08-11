@@ -86,7 +86,15 @@ export const storage = {
 
   // Category operations
   async getCategories() {
-    return await db.select().from(categories);
+    try {
+      console.log('Fetching categories from database...');
+      const result = await db.select().from(categories);
+      console.log(`Successfully fetched ${result.length} categories`);
+      return result;
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
   },
 
   async createCategory(categoryData: any) {
