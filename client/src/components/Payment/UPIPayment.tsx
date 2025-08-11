@@ -111,15 +111,11 @@ const UPIPayment: React.FC<UPIPaymentProps> = ({
       const success = Math.random() > 0.15;
       
       if (success) {
-        const { error } = await supabase
-          .from('payments')
-          .update({ 
-            status: 'completed',
-            completed_at: new Date().toISOString()
-          })
-          .eq('transaction_id', transactionId);
-        
-        if (error) throw error;
+        // Update transaction status via API
+        await transactionService.updateTransaction(orderId, {
+          status: 'completed',
+          completedAt: new Date()
+        });
         
         onPaymentSuccess({
           success: true,

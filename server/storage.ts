@@ -47,15 +47,15 @@ export const storage = {
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as typeof query;
     }
     
     if (filters.limit) {
-      query = query.limit(filters.limit);
+      query = query.limit(filters.limit) as typeof query;
     }
     
     if (filters.offset) {
-      query = query.offset(filters.offset);
+      query = query.offset(filters.offset) as typeof query;
     }
     
     return await query;
@@ -81,7 +81,7 @@ export const storage = {
 
   async deleteProduct(id: string) {
     const result = await db.delete(products).where(eq(products.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   },
 
   // Category operations
@@ -140,7 +140,7 @@ export const storage = {
   async removeFromWishlist(userId: string, productId: string) {
     const result = await db.delete(wishlistItems)
       .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   },
 
   // Cart operations
@@ -163,12 +163,12 @@ export const storage = {
 
   async removeFromCart(id: string) {
     const result = await db.delete(cartItems).where(eq(cartItems.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   },
 
   async clearCart(userId: string) {
     const result = await db.delete(cartItems).where(eq(cartItems.userId, userId));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   },
 
   // Review operations
