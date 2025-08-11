@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import Stripe from "stripe";
+import Razorpay from "razorpay";
 import { db } from "./db";
 import { storage } from "./storage";
 import {
@@ -21,7 +22,13 @@ import { eq } from 'drizzle-orm';
 
 // Initialize Stripe with dummy key for development
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy_key_for_development", {
-  apiVersion: "2023-10-16",
+  apiVersion: "2024-06-20",
+});
+
+// Initialize Razorpay with actual credentials
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || '',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
 });
 
 // Mock data fallback when database is not available
@@ -564,59 +571,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid amount' });
       }
       
-      // Mock Razorpay order creation for development
-      const mockOrder = {
-        id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
-        entity: 'order',
-        amount: amount * 100, // Convert to paise
-        amount_paid: 0,
-        amount_due: amount * 100,
+      // Create actual Razorpay order
+      const orderOptions = {
+        amount: Math.round(amount * 100), // Convert to paise and ensure integer
         currency: currency || 'INR',
-        receipt: receipt,
-        status: 'created',
-        attempts: 0,
-        notes: notes || {},
-        created_at: Math.floor(Date.now() / 1000)
+        receipt: receipt || `order_${Date.now()}`,
+        notes: notes || {}
       };
       
-      console.log('Created Razorpay order:', mockOrder);
-      res.json({ success: true, order: mockOrder });
+      const order = await razorpay.orders.create(orderOptions);
+      console.log('Created Razorpay order:', order);
+      
+      res.json({ 
+        success: true, 
+        order,
+        keyId: process.env.RAZORPAY_KEY_ID // Send key ID for frontend
+      });
     } catch (error) {
       console.error('Error creating Razorpay order:', error);
-      res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to create order' });
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Failed to create order'
+      });
     }
   });
 
   app.post('/api/payments/razorpay/verify', async (req, res) => {
     try {
-      const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
       
       // Validate input
-      if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
         return res.status(400).json({ error: 'Missing payment verification data' });
       }
       
-      // Mock payment verification for development
-      console.log('Verifying Razorpay payment:', {
-        orderId: razorpayOrderId,
-        paymentId: razorpayPaymentId,
-        signature: razorpaySignature
-      });
+      // Verify payment signature
+      const crypto = await import('crypto');
+      const body = razorpay_order_id + "|" + razorpay_payment_id;
+      const expectedSignature = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+        .update(body.toString())
+        .digest('hex');
       
-      // Mock successful verification (in production, verify signature with Razorpay)
-      const verificationResult = {
-        verified: true,
-        paymentId: razorpayPaymentId,
-        orderId: razorpayOrderId,
-        status: 'captured',
-        amount: 100, // Mock amount in paise
-        timestamp: Date.now()
-      };
+      const isAuthentic = expectedSignature === razorpay_signature;
       
-      res.json({ success: true, verification: verificationResult });
+      if (isAuthentic) {
+        // Fetch payment details from Razorpay
+        const payment = await razorpay.payments.fetch(razorpay_payment_id);
+        
+        console.log('Payment verified successfully:', {
+          paymentId: razorpay_payment_id,
+          orderId: razorpay_order_id,
+          amount: payment.amount,
+          status: payment.status
+        });
+        
+        res.json({ 
+          success: true, 
+          verified: true,
+          payment: {
+            id: razorpay_payment_id,
+            orderId: razorpay_order_id,
+            amount: payment.amount,
+            status: payment.status,
+            method: payment.method,
+            timestamp: Date.now()
+          }
+        });
+      } else {
+        console.log('Payment verification failed: Invalid signature');
+        res.status(400).json({ 
+          success: false, 
+          error: 'Invalid payment signature' 
+        });
+      }
     } catch (error) {
       console.error('Error verifying Razorpay payment:', error);
-      res.status(500).json({ error: error instanceof Error ? error.message : 'Payment verification failed' });
+      res.status(500).json({ 
+        success: false,
+        error: error instanceof Error ? error.message : 'Payment verification failed' 
+      });
     }
   });
 

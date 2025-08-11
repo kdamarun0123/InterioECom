@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StreamlinedUPIPayment from './StreamlinedUPIPayment';
-import StreamlinedRazorpayUPI from './StreamlinedRazorpayUPI';
+import RazorpayPayment from './RazorpayPayment';
 import StreamlinedCODPayment from './StreamlinedCODPayment';
 import { StreamlinedPaymentMethodType } from './StreamlinedPaymentMethod';
 
@@ -60,17 +60,14 @@ const StreamlinedPaymentSection: React.FC<StreamlinedPaymentSectionProps> = ({
         )}
         
         {paymentMethod === 'razorpay-upi' && (
-          <>
-            {console.log('Rendering Razorpay UPI payment component')}
-          <StreamlinedRazorpayUPI
+          <RazorpayPayment
             key="razorpay-upi"
             amount={amount}
-            customerInfo={customerInfo}
             orderId={orderId}
-            onPaymentSuccess={onPaymentSuccess}
-            onPaymentError={onPaymentError}
+            customerInfo={customerInfo}
+            onSuccess={onPaymentSuccess}
+            onError={onPaymentError}
           />
-          </>
         )}
         
         {paymentMethod === 'cod' && (

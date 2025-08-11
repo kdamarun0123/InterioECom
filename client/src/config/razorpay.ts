@@ -1,8 +1,8 @@
 // Razorpay Configuration
 export const RAZORPAY_CONFIG = {
-  // Test API Keys - Replace with your actual test keys
-  keyId: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag', // Test Key ID
-  keySecret: import.meta.env.RAZORPAY_KEY_SECRET || 'thisissecretkey', // Server-side only
+  // Test API Keys - Will be provided from server
+  keyId: '', // Will be set from API response for security
+  keySecret: '', // Never exposed to client
   
   // Test webhook secret
   webhookSecret: import.meta.env.RAZORPAY_WEBHOOK_SECRET || 'whsec_test_webhook_secret_dummy',
