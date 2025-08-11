@@ -436,7 +436,7 @@ const StreamlinedCheckout: React.FC<StreamlinedCheckoutProps> = ({
       />
       
       {/* Debug info - remove in production */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <div className="bg-yellow-50 rounded-xl p-4 mt-4">
           <h4 className="font-medium text-yellow-900 mb-2">Debug Info</h4>
           <div className="text-sm text-yellow-800 space-y-1">

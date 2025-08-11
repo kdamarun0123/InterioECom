@@ -402,6 +402,18 @@ const EnhancedRegisterForm: React.FC<EnhancedRegisterFormProps> = ({
         </div>
       )}
 
+      {/* Test Credentials Notice */}
+      {import.meta.env.DEV && (
+        <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+          <h4 className="font-medium text-blue-900 mb-2">Test Credentials</h4>
+          <div className="text-sm text-blue-800 space-y-1">
+            <p>• Email: test@example.com</p>
+            <p>• Password: password123</p>
+            <p>• Or create a new account</p>
+          </div>
+        </div>
+      )}
+
       {/* Switch to Login */}
       <div className="mt-8 text-center">
         <p className="text-gray-600">

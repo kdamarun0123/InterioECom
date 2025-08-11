@@ -62,7 +62,7 @@ const SessionMonitor: React.FC = () => {
   if (!user || !sessionExpiry) return null;
 
   // Only show in development or when warning is needed
-  if (process.env.NODE_ENV !== 'development' && !showWarning) return null;
+  if (!import.meta.env.DEV && !showWarning) return null;
 
   return (
     <AnimatePresence>

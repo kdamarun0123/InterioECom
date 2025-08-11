@@ -34,7 +34,7 @@ export class PaymentDiagnostics {
     }
 
     // Console logging for development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.group(`🔍 Payment Diagnostic - ${diagnostic.category}`);
       console.log('Type:', diagnostic.type);
       console.log('Message:', diagnostic.message);
