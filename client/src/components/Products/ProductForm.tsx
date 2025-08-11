@@ -38,6 +38,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   const {
     register,
@@ -74,6 +75,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
     try {
       console.log('Submitting product form:', data);
 
+      // Clear previous messages
+      setSubmitError(null);
+      setSubmitSuccess(null);
+
       // Prepare product data
       const productData = {
         name: data.name.trim(),
@@ -95,14 +100,19 @@ const ProductForm: React.FC<ProductFormProps> = ({
         // Update existing product
         await productService.updateProduct(product.id, productData);
         console.log('Product updated successfully');
+        setSubmitSuccess('Product updated successfully!');
       } else {
         // Create new product
         const result = await productService.createProduct(productData);
         console.log('Product created successfully:', result);
+        setSubmitSuccess('Product created successfully!');
       }
 
-      reset();
-      onSuccess();
+      // Show success message for 2 seconds before closing
+      setTimeout(() => {
+        reset();
+        onSuccess();
+      }, 2000);
     } catch (error) {
       console.error('Error submitting product:', error);
       setSubmitError(error instanceof Error ? error.message : 'Failed to save product');
@@ -166,6 +176,20 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl"
                 >
                   <p className="text-red-800 font-medium">{submitError}</p>
+                </motion.div>
+              )}
+
+              {/* Success Display */}
+              {submitSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl"
+                >
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <p className="text-green-800 font-medium">{submitSuccess}</p>
+                  </div>
                 </motion.div>
               )}
 
